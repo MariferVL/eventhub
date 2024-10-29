@@ -57,7 +57,18 @@ io.on("connection", (socket) => {
   });
 });
 
-app.use(express.static('public'));
+// Error handling middleware
+app.use((err, req, res, next) => {
+  if (err.name === "ValidationError") {
+    // Handle validation errors and respond with a 400 status code and the error message
+    return res.status(400).json({ message: err.message });
+  }
+
+  // For other errors, you can send a generic or specific message
+  res.status(500).json({ message: "Internal server error" });
+});
+
+app.use(express.static("public"));
 
 // Start the server
 server.listen(PORT, () => {
