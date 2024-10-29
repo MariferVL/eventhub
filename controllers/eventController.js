@@ -1,62 +1,91 @@
-const Event = require("../models/Event");
-const Reservation = require("../models/Reservation");
-
-const cache = {}; // Almacén de caché
+const Event = require("../models/Event"); // Import Event model
+const Reservation = require("../models/Reservation"); // Import Reservation model
+const cache = {}; // Cache store
 
 // Create a new event
 exports.createEvent = async (req, res) => {
-  const { title, date, capacity } = req.body;
+  try {
+    const { title, date, capacity } = req.body;
+    
+    // Input validation
+    if (!title || !date || !capacity) {
+      return res.status(400).json({ message: "All fields are required: title, date, capacity." });
+    }
 
-  const event = new Event({
-    title,
-    date,
-    capacity,
-    availableSlots: capacity,
-    organizer: req.user.id // Assuming req.user is populated by the auth middleware
-  });
+    // Create a new event instance
+    const event = new Event({
+      title,
+      date,
+      capacity,
+      availableSlots: capacity,
+      organizer: req.user.id // Assuming req.user is populated by the authentication middleware
+    });
+    await event.save();
 
-  await event.save();
-  res.status(201).json({ message: "Event created successfully", event });
+    res.status(201).json({ message: "Event created successfully", event });
+  } catch (error) {
+    console.error("Error creating the event:", error);
+    res.status(500).json({ message: "An error occurred while creating the event." });
+  }
 };
 
 // Get all events
 exports.getEvents = async (req, res) => {
-  const events = await Event.find();
-  res.json(events);
+  try {
+    const events = await Event.find();
+    res.json(events);
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    res.status(500).json({ message: "An error occurred while fetching events." });
+  }
 };
 
 // Get a specific event by ID
 exports.getEventById = async (req, res) => {
-  const { eventId } = req.params; // ID del evento
-
-  // Verifica si ya está en caché
+  const { eventId } = req.params;
+  
+  // Check if the event is already in cache
   if (cache[eventId]) {
-      return res.status(200).json(cache[eventId]); // Devuelve del caché
+    return res.status(200).json(cache[eventId]);
   }
 
-  // Busca el evento en la base de datos
-  const event = await Event.findById(eventId);
-  if (!event) return res.status(404).json({ message: "Event not found" });
+  try {
+    const event = await Event.findById(eventId);
+    if (!event) return res.status(404).json({ message: "Event not found" });
 
-  // Almacena el evento en caché
-  cache[eventId] = event;
-
-  res.json(event);
+    // Store the event in cache
+    cache[eventId] = event;
+    res.json(event);
+  } catch (error) {
+    console.error("Error fetching the event:", error);
+    res.status(500).json({ message: "An error occurred while fetching the event." });
+  }
 };
-
 
 // Update an event
 exports.updateEvent = async (req, res) => {
   const { title, date, capacity } = req.body;
-  const event = await Event.findByIdAndUpdate(req.params.id, { title, date, capacity }, { new: true });
-  
-  if (!event) return res.status(404).json({ message: "Event not found" });
-  res.json({ message: "Event updated successfully", event });
+  try {
+    const event = await Event.findByIdAndUpdate(req.params.id, { title, date, capacity }, { new: true });
+
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    res.json({ message: "Event updated successfully", event });
+  } catch (error) {
+    console.error("Error updating the event:", error);
+    res.status(500).json({ message: "An error occurred while updating the event." });
+  }
 };
 
 // Delete an event
 exports.deleteEvent = async (req, res) => {
-  const event = await Event.findByIdAndDelete(req.params.id);
-  if (!event) return res.status(404).json({ message: "Event not found" });
-  res.json({ message: "Event deleted successfully" });
+  try {
+    const event = await Event.findByIdAndDelete(req.params.id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    res.json({ message: "Event deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting the event:", error);
+    res.status(500).json({ message: "An error occurred while deleting the event." });
+  }
 };

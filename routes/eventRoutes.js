@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const eventController = require("../controllers/eventController");
-const { authenticateToken, authorizeRole } = require("../middlewares/authMiddleware");
+const eventController = require("../controllers/eventController"); // Import eventController
+const { authenticateToken, authorizeRole } = require("../middlewares/authMiddleware"); // Import middlewares
 
 // Create a new event (protected route for organizers)
 router.post("/", authenticateToken, authorizeRole(["organizer"]), eventController.createEvent);
