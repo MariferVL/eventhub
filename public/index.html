@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Availability Notifications</title>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <h1>Event Availability Notifications</h1>
+    <div id="availability"></div>
+
+    <script>
+        const socket = io();
+
+        // Escuchar cambios de disponibilidad
+        socket.on('availabilityStatus', (data) => {
+            document.getElementById('availability').innerText = 
+                `Event ID: ${data.eventId} - Tickets Available: ${data.remainingTickets}`;
+        });
+    </script>
+</body>
+</html>
