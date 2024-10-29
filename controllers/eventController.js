@@ -1,6 +1,8 @@
 const Event = require("../models/Event");
 const Reservation = require("../models/Reservation");
 
+const cache = {}; // Almacén de caché
+
 // Create a new event
 exports.createEvent = async (req, res) => {
   const { title, date, capacity } = req.body;
@@ -25,10 +27,23 @@ exports.getEvents = async (req, res) => {
 
 // Get a specific event by ID
 exports.getEventById = async (req, res) => {
-  const event = await Event.findById(req.params.id);
+  const { eventId } = req.params; // ID del evento
+
+  // Verifica si ya está en caché
+  if (cache[eventId]) {
+      return res.status(200).json(cache[eventId]); // Devuelve del caché
+  }
+
+  // Busca el evento en la base de datos
+  const event = await Event.findById(eventId);
   if (!event) return res.status(404).json({ message: "Event not found" });
+
+  // Almacena el evento en caché
+  cache[eventId] = event;
+
   res.json(event);
 };
+
 
 // Update an event
 exports.updateEvent = async (req, res) => {
