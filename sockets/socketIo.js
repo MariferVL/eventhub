@@ -1,21 +1,22 @@
 const { Server } = require('socket.io');
-const http = require('http'); // Asegúrate de que esto sea correcto según tu implementación
 
-const socketServer = http.createServer(); // Crea el servidor HTTP si aún no lo has hecho
-const io = new Server(socketServer);
+const setupSocket = (server) => {
+  const io = new Server(server);
 
-io.on("connection", (socket) => {
-  console.log("New client connected");
+  io.on("connection", (socket) => {
+    console.log("New client connected");
 
-  // Channel for ticket availability notifications
-  socket.on("checkAvailability", (data) => {
-    io.emit("availabilityStatus", data);
+    // Channel for ticket availability notifications
+    socket.on("checkAvailability", (data) => {
+      io.emit("availabilityStatus", data);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Client disconnected");
+    });
   });
 
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
-  });
-});
+  return io; // Retorna la instancia de io si necesitas usarla en otros módulos
+};
 
-// Exporta el objeto io para ser utilizado en otros módulos
-module.exports = { io, socketServer };
+module.exports = { setupSocket };

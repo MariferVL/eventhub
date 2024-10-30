@@ -1,34 +1,28 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const http = require("http");
-const { Server } = require("socket.io");
 const cookieParser = require("cookie-parser");
-// const listEndpoints = require('express-list-endpoints'); //TODO: Borrar antes de prod
-
-// Load environment variables from a .env file into process.env
 const dotenv = require("dotenv");
-dotenv.config(); // Common way to configure dotenv
-
-// Import routes
 const authRoutes = require("./routes/authRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const userRoutes = require("./routes/userRoutes");
 const reservationRoutes = require("./routes/reservationRoutes");
+const { setupSocket } = require("./sockets/socketIo"); // Importar la configuración de Socket.io
 
+dotenv.config(); // Cargar las variables de entorno
 
-// Create an Express application
+// Crear una aplicación Express
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
+const server = http.createServer(app); // Crear el servidor HTTP
 
-// Set port from environment or default to 5000
+// Configurar puerto desde las variables de entorno o por defecto 5000
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(express.json()); // Parse JSON bodies
-app.use(cookieParser()); // Parse cookies
+app.use(express.json()); // Parsear cuerpos JSON
+app.use(cookieParser()); // Parsear cookies
 
-// MongoDB Connection
+// Conexión a MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
@@ -38,50 +32,32 @@ mongoose
     console.error("MongoDB connection error:", err);
   });
 
-// Routes
-app.use("/api/auth", authRoutes); // Authentication routes
-app.use("/api/events", eventRoutes); // Event routes
-app.use("/api/users", userRoutes); // User routes
-app.use("/api/reservations", reservationRoutes); // User routes
+// Rutas
+app.use("/api/auth", authRoutes); // Rutas de autenticación
+app.use("/api/events", eventRoutes); // Rutas de eventos
+app.use("/api/users", userRoutes); // Rutas de usuarios
+app.use("/api/reservations", reservationRoutes); // Rutas de reservas
 
-
-require('./swagger')(app); 
-
-// Default route
+// Ruta por defecto
 app.get("/", (req, res) => {
   res.send("Welcome to the Event Reservation API");
 });
 
-// Configure socket.io to handle real-time availability events
-io.on("connection", (socket) => {
-  console.log("New client connected");
+// Inicializar Socket.io
+const io = setupSocket(server); // Pasa el servidor al configurador de Socket.io
 
-  // Channel for ticket availability notifications
-  socket.on("checkAvailability", (data) => {
-    io.emit("availabilityStatus", data);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
-  });
-});
-
-// Error handling middleware
+// Middleware de manejo de errores
 app.use((err, req, res, next) => {
   if (err.name === "ValidationError") {
-    // Handle validation errors and respond with a 400 status code and the error message
     return res.status(400).json({ message: err.message });
   }
-  // For other errors, you can send a generic or specific message
   res.status(500).json({ message: "Internal server error" });
 });
 
+// Servir archivos estáticos
 app.use(express.static("public"));
 
-// Start the server
+// Iniciar el servidor
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-  // console.log(listEndpoints(app));//TODO: Borrar antes de prod
 });
-
-module.exports = { io };

@@ -2,7 +2,6 @@ const mongoose = require("mongoose"); // Import mongoose
 const Reservation = require("../models/Reservation"); // Import Reservation model
 const Event = require("../models/Event"); // Import Event model
 const { notifyAvailability } = require("../sockets/eventSocket");
-const {io} = require("../sockets/socketIo")
 
 // Create a reservation for an event
 /**
@@ -65,7 +64,7 @@ exports.createReservation = async (req, res) => {
     await event.save();
 
     // Emit real-time notification about availability update
-    notifyAvailability(io, {
+    notifyAvailability({
       eventId: event._id,
       availableSlots: event.availableSlots,
     });
