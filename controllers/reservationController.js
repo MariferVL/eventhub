@@ -1,8 +1,36 @@
-const Reservation = require("../models/Reservation");
-const Event = require("../models/Event");
+const Reservation = require("../models/Reservation"); // Import Reservation model
+const Event = require("../models/Event"); // Import Event model
 const { io } = require("../server"); // Import `io` from server.js
 
 // Create a reservation for an event
+/**
+ * @swagger
+ * /reservations:
+ *   post:
+ *     summary: Create a reservation for an event
+ *     tags: [Reservations]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - eventId
+ *             properties:
+ *               eventId:
+ *                 type: string
+ *                 description: The ID of the event
+ *     responses:
+ *       201:
+ *         description: Reservation created successfully
+ *       400:
+ *         description: No available slots for this event
+ *       404:
+ *         description: Event not found
+ *       500:
+ *         description: Internal server error
+ */
 exports.createReservation = async (req, res) => {
   try {
     const { eventId } = req.body;
@@ -42,6 +70,24 @@ exports.createReservation = async (req, res) => {
 };
 
 // Get all reservations for a user
+/**
+ * @swagger
+ * /reservations/user:
+ *   get:
+ *     summary: Get all reservations for a user
+ *     tags: [Reservations]
+ *     responses:
+ *       200:
+ *         description: List of user reservations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Reservation'
+ *       500:
+ *         description: Internal server error
+ */
 exports.getUserReservations = async (req, res) => {
   try {
     // Find and return the current user's reservations

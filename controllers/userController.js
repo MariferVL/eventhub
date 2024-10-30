@@ -1,6 +1,24 @@
-const User = require("../models/User");
+const User = require("../models/User"); // Import User model
 
 // Get user details
+/**
+ * @swagger
+ * /users/me:
+ *   get:
+ *     summary: Get user details
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       500:
+ *         description: Internal server error
+ */
 exports.getUserDetails = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password -refreshToken"); // Exclude sensitive data
@@ -11,6 +29,37 @@ exports.getUserDetails = async (req, res) => {
 };
 
 // Update user details
+/**
+ * @swagger
+ * /users/me:
+ *   put:
+ *     summary: Update user details
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: User details updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Error updating user details
+ *       500:
+ *         description: Internal server error
+ */
 exports.updateUserDetails = async (req, res) => {
   const { username, password } = req.body; // Assuming we want to update these fields
   try {

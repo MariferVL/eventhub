@@ -3,21 +3,24 @@ const mongoose = require("mongoose");
 const http = require("http");
 const { Server } = require("socket.io");
 const cookieParser = require("cookie-parser");
+const listEndpoints = require('express-list-endpoints');
+
 // Load environment variables from a .env file into process.env
 const dotenv = require("dotenv");
+dotenv.config(); // Common way to configure dotenv
+
+// Import routes
 const authRoutes = require("./routes/authRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const userRoutes = require("./routes/userRoutes");
 
-dotenv.config(); // Common way to configure dotenv
-// Alternative concise approach
-// require('dotenv').config();
-
+// Create an Express application
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-const PORT = process.env.PORT || 5000; // Set port from environment or default to 5000
+// Set port from environment or default to 5000
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json()); // Parse JSON bodies
@@ -43,11 +46,11 @@ app.get("/", (req, res) => {
   res.send("Welcome to the Event Reservation API");
 });
 
-// Configurar socket.io para manejar eventos de disponibilidad en tiempo real
+// Configure socket.io to handle real-time availability events
 io.on("connection", (socket) => {
   console.log("New client connected");
 
-  // Canal para notificaciones de disponibilidad de entradas
+  // Channel for ticket availability notifications
   socket.on("checkAvailability", (data) => {
     io.emit("availabilityStatus", data);
   });
@@ -63,7 +66,6 @@ app.use((err, req, res, next) => {
     // Handle validation errors and respond with a 400 status code and the error message
     return res.status(400).json({ message: err.message });
   }
-
   // For other errors, you can send a generic or specific message
   res.status(500).json({ message: "Internal server error" });
 });
@@ -73,6 +75,7 @@ app.use(express.static("public"));
 // Start the server
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  // console.log(listEndpoints(app));
 });
 
 module.exports = { io };

@@ -1,6 +1,7 @@
 // Load environment variables from .env file
 require('dotenv').config();
-const mongoose = require('mongoose');
+
+const mongoose = require('mongoose'); // Import mongoose
 
 // Connect to MongoDB using the URI from the .env file
 mongoose.connect(process.env.MONGO_URI)
@@ -11,6 +12,7 @@ mongoose.connect(process.env.MONGO_URI)
         console.error('MongoDB connection error:', err);
     });
 
+// Define the User schema
 const userSchema = new mongoose.Schema({
     username: String,
     email: String,
@@ -18,6 +20,7 @@ const userSchema = new mongoose.Schema({
     created_at: { type: Date, default: Date.now },
 });
 
+// Create the User model
 const User = mongoose.model('User', userSchema);
 
 // Create a new user document
@@ -27,6 +30,7 @@ const newUser = new User({
     role: 'user',
 });
 
+// Save the new user document to the database
 newUser.save()
     .then(() => {
         console.log('User created successfully!');
