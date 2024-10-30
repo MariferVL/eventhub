@@ -41,6 +41,8 @@ app.use("/api/auth", authRoutes); // Authentication routes
 app.use("/api/events", eventRoutes); // Event routes
 app.use("/api/users", userRoutes); // User routes
 
+require('./swagger')(app); 
+
 // Default route
 app.get("/", (req, res) => {
   res.send("Welcome to the Event Reservation API");
