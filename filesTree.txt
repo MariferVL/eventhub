@@ -1,0 +1,38 @@
+📦EventHubBackend
+ ┣ 📂.git
+ ┣ 📂config
+ ┃ ┗ 📜db.js
+ ┣ 📂controllers
+ ┃ ┣ 📜authController.js
+ ┃ ┣ 📜eventController.js
+ ┃ ┣ 📜reservationController.js
+ ┃ ┗ 📜userController.js
+ ┣ 📂middlewares
+ ┃ ┣ 📜authMiddleware.js
+ ┃ ┗ 📜cache.js
+ ┣ 📂models
+ ┃ ┣ 📜Event.js
+ ┃ ┣ 📜Reservation.js
+ ┃ ┗ 📜User.js
+ ┣ 📂node_modules
+ ┣ 📂routes
+ ┃ ┣ 📜authRoutes.js
+ ┃ ┣ 📜eventRoutes.js
+ ┃ ┣ 📜reservationRoutes.js
+ ┃ ┗ 📜userRoutes.js
+ ┣ 📂sockets
+ ┃ ┣ 📜eventSocket.js
+ ┃ ┗ 📜socketIo.js
+ ┣ 📂tests
+ ┃ ┣ 📜auth.test.js
+ ┃ ┣ 📜event.test.js
+ ┃ ┗ 📜reservation.test.js
+ ┣ 📜.env
+ ┣ 📜.gitignore
+ ┣ 📜createUser.js
+ ┣ 📜package-lock.json
+ ┣ 📜package.json
+ ┣ 📜README.md
+ ┣ 📜server.js
+ ┣ 📜swagger.js
+ ┗ 📜testMongoConnection.js
