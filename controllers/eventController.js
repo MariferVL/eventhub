@@ -42,19 +42,19 @@ exports.getEvents = async (req, res) => {
 
 // Get a specific event by ID
 exports.getEventById = async (req, res) => {
-  const { eventId } = req.params;
+  const { id } = req.params;
   
   // Check if the event is already in cache
-  if (cache[eventId]) {
-    return res.status(200).json(cache[eventId]);
+  if (cache[id]) {
+    return res.status(200).json(cache[id]);
   }
 
   try {
-    const event = await Event.findById(eventId);
+    const event = await Event.findById(id);
     if (!event) return res.status(404).json({ message: "Event not found" });
 
     // Store the event in cache
-    cache[eventId] = event;
+    cache[id] = event;
     res.json(event);
   } catch (error) {
     console.error("Error fetching the event:", error);
