@@ -1,3 +1,4 @@
+const mongoose = require('mongoose'); // Import mongoose
 const Event = require("../models/Event"); // Import Event model
 const Reservation = require("../models/Reservation"); // Import Reservation model
 const cache = {}; // Cache store
@@ -30,10 +31,12 @@ const cache = {}; // Cache store
 exports.createEvent = async (req, res) => {
   try {
     const { title, date, capacity } = req.body;
-    
+
     // Input validation
     if (!title || !date || !capacity) {
-      return res.status(400).json({ message: "All fields are required: title, date, capacity." });
+      return res
+        .status(400)
+        .json({ message: "All fields are required: title, date, capacity." });
     }
 
     // Create a new event instance
@@ -42,14 +45,16 @@ exports.createEvent = async (req, res) => {
       date,
       capacity,
       availableSlots: capacity,
-      organizer: req.user.id // Assuming req.user is populated by the authentication middleware
+      organizer: req.user.id, // Assuming req.user is populated by the authentication middleware
     });
     await event.save();
 
     res.status(201).json({ message: "Event created successfully", event });
   } catch (error) {
     console.error("Error creating the event:", error);
-    res.status(500).json({ message: "An error occurred while creating the event." });
+    res
+      .status(500)
+      .json({ message: "An error occurred while creating the event." });
   }
 };
 
@@ -78,7 +83,9 @@ exports.getEvents = async (req, res) => {
     res.json(events);
   } catch (error) {
     console.error("Error fetching events:", error);
-    res.status(500).json({ message: "An error occurred while fetching events." });
+    res
+      .status(500)
+      .json({ message: "An error occurred while fetching events." });
   }
 };
 
@@ -108,9 +115,17 @@ exports.getEvents = async (req, res) => {
  *       500:
  *         description: Internal server error
  */
+// Get a specific event by ID
 exports.getEventById = async (req, res) => {
   const { id } = req.params;
-  
+
+  // console.log("Received ID:", id); // Debugging line
+
+  // Validate ObjectId format
+  if (!mongoose.isValidObjectId(id)) {
+    return res.status(400).json({ message: "Invalid ID format." });
+  }
+
   // Check if the event is already in cache
   if (cache[id]) {
     return res.status(200).json(cache[id]);
@@ -118,7 +133,11 @@ exports.getEventById = async (req, res) => {
 
   try {
     const event = await Event.findById(id);
-    if (!event) return res.status(404).json({ message: "Event not found" });
+    
+    // Check if event exists
+    if (!event) {
+      return res.status(404).json({ message: "Event not found." });
+    }
 
     // Store the event in cache
     cache[id] = event;
@@ -128,6 +147,7 @@ exports.getEventById = async (req, res) => {
     res.status(500).json({ message: "An error occurred while fetching the event." });
   }
 };
+
 
 // Update an event
 /**
@@ -163,17 +183,31 @@ exports.getEventById = async (req, res) => {
  *       500:
  *         description: Internal server error
  */
+// Update an event
 exports.updateEvent = async (req, res) => {
+  const { id } = req.params;
   const { title, date, capacity } = req.body;
+
+  // Validate ObjectId
+  if (!mongoose.isValidObjectId(id)) {
+    return res.status(400).json({ message: "Invalid ID format." });
+  }
+
   try {
-    const event = await Event.findByIdAndUpdate(req.params.id, { title, date, capacity }, { new: true });
+    const event = await Event.findByIdAndUpdate(
+      id,
+      { title, date, capacity },
+      { new: true }
+    );
 
     if (!event) return res.status(404).json({ message: "Event not found" });
 
     res.json({ message: "Event updated successfully", event });
   } catch (error) {
     console.error("Error updating the event:", error);
-    res.status(500).json({ message: "An error occurred while updating the event." });
+    res
+      .status(500)
+      .json({ message: "An error occurred while updating the event." });
   }
 };
 
@@ -199,14 +233,24 @@ exports.updateEvent = async (req, res) => {
  *       500:
  *         description: Internal server error
  */
+// Delete an event
 exports.deleteEvent = async (req, res) => {
+  const { id } = req.params;
+
+  // Validate ObjectId
+  if (!mongoose.isValidObjectId(id)) {
+    return res.status(400).json({ message: "Invalid ID format." });
+  }
+
   try {
-    const event = await Event.findByIdAndDelete(req.params.id);
+    const event = await Event.findByIdAndDelete(id);
     if (!event) return res.status(404).json({ message: "Event not found" });
 
     res.json({ message: "Event deleted successfully" });
   } catch (error) {
     console.error("Error deleting the event:", error);
-    res.status(500).json({ message: "An error occurred while deleting the event." });
+    res
+      .status(500)
+      .json({ message: "An error occurred while deleting the event." });
   }
 };

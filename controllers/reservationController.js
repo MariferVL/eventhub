@@ -1,6 +1,8 @@
+const mongoose = require("mongoose"); // Import mongoose
 const Reservation = require("../models/Reservation"); // Import Reservation model
 const Event = require("../models/Event"); // Import Event model
-const { io } = require("../server"); // Import `io` from server.js
+const { notifyAvailability } = require("../sockets/eventSocket");
+const {io} = require("../sockets/socketIo")
 
 // Create a reservation for an event
 /**
@@ -25,7 +27,7 @@ const { io } = require("../server"); // Import `io` from server.js
  *       201:
  *         description: Reservation created successfully
  *       400:
- *         description: No available slots for this event
+ *         description: No available slots for this event or invalid event ID format
  *       404:
  *         description: Event not found
  *       500:
@@ -34,20 +36,27 @@ const { io } = require("../server"); // Import `io` from server.js
 exports.createReservation = async (req, res) => {
   try {
     const { eventId } = req.body;
-    
+
+    // Validate ObjectId format
+    if (!mongoose.isValidObjectId(eventId)) {
+      return res.status(400).json({ message: "Invalid event ID format." });
+    }
+
     // Find the event by ID
     const event = await Event.findById(eventId);
-    if (!event) return res.status(404).json({ message: "Event not found" });
+    if (!event) return res.status(404).json({ message: "Event not found." });
 
     // Check the availability of slots
     if (event.availableSlots <= 0) {
-      return res.status(400).json({ message: "No available slots for this event" });
+      return res
+        .status(400)
+        .json({ message: "No available slots for this event." });
     }
 
     // Create and save the reservation
     const reservation = new Reservation({
       user: req.user.id, // req.user must be populated by authentication middleware
-      event: eventId
+      event: eventId,
     });
     await reservation.save();
 
@@ -56,16 +65,20 @@ exports.createReservation = async (req, res) => {
     await event.save();
 
     // Emit real-time notification about availability update
-    io.emit("availabilityStatus", {
+    notifyAvailability(io, {
       eventId: event._id,
-      availableSlots: event.availableSlots
+      availableSlots: event.availableSlots,
     });
 
     // Respond with the confirmation of the created reservation
-    res.status(201).json({ message: "Reservation created successfully", reservation });
+    res
+      .status(201)
+      .json({ message: "Reservation created successfully.", reservation });
   } catch (error) {
     console.error("Error creating reservation:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res
+      .status(500)
+      .json({ message: "An error occurred while creating the reservation." });
   }
 };
 
@@ -91,10 +104,14 @@ exports.createReservation = async (req, res) => {
 exports.getUserReservations = async (req, res) => {
   try {
     // Find and return the current user's reservations
-    const reservations = await Reservation.find({ user: req.user.id }).populate('event');
+    const reservations = await Reservation.find({ user: req.user.id }).populate(
+      "event"
+    );
     res.json(reservations);
   } catch (error) {
     console.error("Error fetching user reservations:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res
+      .status(500)
+      .json({ message: "An error occurred while fetching your reservations." });
   }
 };

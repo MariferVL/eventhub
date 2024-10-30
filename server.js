@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const http = require("http");
 const { Server } = require("socket.io");
 const cookieParser = require("cookie-parser");
-const listEndpoints = require('express-list-endpoints');
+// const listEndpoints = require('express-list-endpoints'); //TODO: Borrar antes de prod
 
 // Load environment variables from a .env file into process.env
 const dotenv = require("dotenv");
@@ -13,6 +13,8 @@ dotenv.config(); // Common way to configure dotenv
 const authRoutes = require("./routes/authRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const userRoutes = require("./routes/userRoutes");
+const reservationRoutes = require("./routes/reservationRoutes");
+
 
 // Create an Express application
 const app = express();
@@ -40,6 +42,8 @@ mongoose
 app.use("/api/auth", authRoutes); // Authentication routes
 app.use("/api/events", eventRoutes); // Event routes
 app.use("/api/users", userRoutes); // User routes
+app.use("/api/reservations", reservationRoutes); // User routes
+
 
 require('./swagger')(app); 
 
@@ -77,7 +81,7 @@ app.use(express.static("public"));
 // Start the server
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-  // console.log(listEndpoints(app));
+  // console.log(listEndpoints(app));//TODO: Borrar antes de prod
 });
 
 module.exports = { io };

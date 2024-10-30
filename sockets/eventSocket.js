@@ -1,6 +1,6 @@
-const { io } = require('./server'); // Import io from server.js
+const { io } = require('../sockets/socketIo'); // Import io from socketIo.js
 
-// Function to send real-time availability notifications
+/// Function to send real-time availability notifications
 /**
  * @swagger
  * components:
@@ -32,7 +32,7 @@ const { io } = require('./server'); // Import io from server.js
  *       200:
  *         description: Notification sent successfully
  */
-function notifyAvailability(status) {
+function notifyAvailability(io, status) {
     io.emit('availabilityStatus', status); // Emit the availability status to all connected clients
 }
 
