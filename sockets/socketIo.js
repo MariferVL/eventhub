@@ -1,8 +1,10 @@
-const { Server } = require('socket.io');
+const { Server } = require('socket.io'); // Import Socket.io
 
+// Function to setup Socket.io server
 const setupSocket = (server) => {
-  const io = new Server(server);
+  const io = new Server(server); // Initialize a new instance of Socket.io with the provided server
 
+  // Handle Socket.io connections
   io.on("connection", (socket) => {
     console.log("New client connected");
 
@@ -11,12 +13,13 @@ const setupSocket = (server) => {
       io.emit("availabilityStatus", data);
     });
 
+    // Handle disconnections
     socket.on("disconnect", () => {
       console.log("Client disconnected");
     });
   });
 
-  return io; // Retorna la instancia de io si necesitas usarla en otros módulos
+  return io; // Return the io instance if needed in other modules
 };
 
-module.exports = { setupSocket };
+module.exports = { setupSocket }; // Export the setupSocket function for use in other modules

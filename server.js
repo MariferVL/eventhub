@@ -1,28 +1,29 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const http = require("http");
-const cookieParser = require("cookie-parser");
-const dotenv = require("dotenv");
-const authRoutes = require("./routes/authRoutes");
-const eventRoutes = require("./routes/eventRoutes");
-const userRoutes = require("./routes/userRoutes");
-const reservationRoutes = require("./routes/reservationRoutes");
-const { setupSocket } = require("./sockets/socketIo"); // Importar la configuración de Socket.io
+const express = require("express"); // Import Express
+const mongoose = require("mongoose"); // Import Mongoose
+const http = require("http"); // Import HTTP module
+const cookieParser = require("cookie-parser"); // Import cookie-parser
+const dotenv = require("dotenv"); // Import dotenv
+const path = require("path"); 
+const authRoutes = require("./routes/authRoutes"); // Import auth routes
+const eventRoutes = require("./routes/eventRoutes"); // Import event routes
+const userRoutes = require("./routes/userRoutes"); // Import user routes
+const reservationRoutes = require("./routes/reservationRoutes"); // Import reservation routes
+const { setupSocket } = require("./sockets/socketIo"); // Import Socket.io setup
 
-dotenv.config(); // Cargar las variables de entorno
+dotenv.config(); // Load environment variables
 
-// Crear una aplicación Express
+// Create an Express application
 const app = express();
-const server = http.createServer(app); // Crear el servidor HTTP
+const server = http.createServer(app); // Create the HTTP server
 
-// Configurar puerto desde las variables de entorno o por defecto 5000
+// Configure port from environment variables or default to 5000
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(express.json()); // Parsear cuerpos JSON
-app.use(cookieParser()); // Parsear cookies
+app.use(express.json()); // Parse JSON bodies
+app.use(cookieParser()); // Parse cookies
 
-// Conexión a MongoDB
+// Connect to MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
@@ -32,21 +33,17 @@ mongoose
     console.error("MongoDB connection error:", err);
   });
 
-// Rutas
-app.use("/api/auth", authRoutes); // Rutas de autenticación
-app.use("/api/events", eventRoutes); // Rutas de eventos
-app.use("/api/users", userRoutes); // Rutas de usuarios
-app.use("/api/reservations", reservationRoutes); // Rutas de reservas
+// Routes
+app.use("/api/auth", authRoutes); // Authentication routes
+app.use("/api/events", eventRoutes); // Event routes
+app.use("/api/users", userRoutes); // User routes
+app.use("/api/reservations", reservationRoutes); // Reservation routes
 
-// Ruta por defecto
-app.get("/", (req, res) => {
-  res.send("Welcome to the Event Reservation API");
-});
 
-// Inicializar Socket.io
-const io = setupSocket(server); // Pasa el servidor al configurador de Socket.io
+// Initialize Socket.io
+const io = setupSocket(server); // Pass the server to the Socket.io setup function
 
-// Middleware de manejo de errores
+// Error handling middleware
 app.use((err, req, res, next) => {
   if (err.name === "ValidationError") {
     return res.status(400).json({ message: err.message });
@@ -54,10 +51,13 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: "Internal server error" });
 });
 
-// Servir archivos estáticos
+// Serve static files
 app.use(express.static("public"));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html')); // Asegúrate de que la ruta sea correcta
+});
 
-// Iniciar el servidor
+// Start the server
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

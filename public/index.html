@@ -1,25 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Event Availability Notifications</title>
-    <!-- Import Socket.io library -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Reservation Website</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="/socket.io/socket.io.js"></script>
-  </head>
-  <body>
-    <h1>Event Availability Notifications</h1>
-    <!-- Div to display availability status -->
-    <div id="availability"></div>
+    <script src="server.js" defer></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <header class="bg-blue-600 text-white p-4">
+        <h1 class="text-3xl">EventHub</h1>
+        <nav>
+            <ul class="flex space-x-4">
+                <li><a href="#events" class="hover:text-blue-300">Events</a></li>
+                <li><a href="#my-reservations" class="hover:text-blue-300">My Reservations</a></li>
+                <li><a href="#profile" class="hover:text-blue-300">Profile</a></li>
+                <li><a href="#help" class="hover:text-blue-300">Help</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="p-6">
+        <section id="hero" class="text-center mb-6">
+            <h2 class="text-2xl font-bold">Welcome to EventHub</h2>
+            <p>Your one-stop solution for all event reservations</p>
+        </section>
+
+        <section id="search" class="mb-6">
+            <h2 class="text-xl font-semibold mb-2">Find Events</h2>
+            <form id="search-form" class="flex space-x-2">
+                <input type="text" id="search-query" placeholder="Search by date, category, or location" class="border p-2 flex-grow">
+                <button type="submit" class="bg-blue-600 text-white p-2">Search</button>
+            </form>
+        </section>
+
+        <section id="events" class="mb-6">
+            <h2 class="text-xl font-semibold mb-2">Featured Events</h2>
+            <div class="event-list">
+                <!-- Featured events will be dynamically loaded here -->
+            </div>
+        </section>
+
+        <section id="event-details" class="hidden mb-6">
+            <h2 class="text-xl font-semibold mb-2">Event Details</h2>
+            <div id="event-info" class="border p-4">
+                <!-- Event details will be dynamically loaded here -->
+            </div>
+            <button id="reserve-btn" class="bg-blue-600 text-white p-2">Reserve Now</button>
+        </section>
+
+        <section id="my-reservations" class="hidden mb-6">
+            <h2 class="text-xl font-semibold mb-2">My Reservations</h2>
+            <div class="reservation-list">
+                <!-- User reservations will be dynamically loaded here -->
+            </div>
+        </section>
+
+        <section id="profile" class="hidden mb-6">
+            <h2 class="text-xl font-semibold mb-2">Profile</h2>
+            <form id="profile-form" class="space-y-4">
+                <div>
+                    <label for="username" class="block">Username:</label>
+                    <input type="text" id="username" name="username" class="border p-2 w-full">
+                </div>
+                <div>
+                    <label for="password" class="block">Password:</label>
+                    <input type="password" id="password" name="password" class="border p-2 w-full">
+                </div>
+                <button type="submit" class="bg-blue-600 text-white p-2">Update Profile</button>
+            </form>
+        </section>
+
+        <section id="reviews" class="hidden mb-6">
+            <h2 class="text-xl font-semibold mb-2">Reviews and Ratings</h2>
+            <div class="reviews-list">
+                <!-- Reviews and ratings will be dynamically loaded here -->
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-blue-600 text-white text-center p-4">
+        <p>&copy; 2024 EventHub. All rights reserved.</p>
+    </footer>
 
     <script>
-      const socket = io(); // Initialize Socket.io
+        const setupSocket = io();
 
-      // Listen for availability status changes
-      socket.on("availabilityStatus", (data) => {
-        document.getElementById(
-          "availability"
-        ).innerText = `Event ID: ${data.eventId} - Tickets Available: ${data.remainingTickets}`;
-      });
+        // Listen for real-time availability notifications
+        setupSocket.on('availabilityStatus', (data) => {
+            document.getElementById('availability').innerText = 
+                `Event ID: ${data.eventId} - Tickets Available: ${data.availableSlots}`;
+        });
     </script>
-  </body>
+</body>
 </html>
