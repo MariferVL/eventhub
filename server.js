@@ -1,4 +1,5 @@
 const express = require("express"); // Import Express
+const cors = require("cors"); // Import Cors
 const mongoose = require("mongoose"); // Import Mongoose
 const http = require("http"); // Import HTTP module
 const cookieParser = require("cookie-parser"); // Import cookie-parser
@@ -20,6 +21,7 @@ const server = http.createServer(app); // Create the HTTP server
 const PORT = process.env.PORT || 5000;
 
 // Middleware
+app.use(cors()); // This will enable CORS for all routes
 app.use(express.json()); // Parse JSON bodies
 app.use(cookieParser()); // Parse cookies
 
@@ -57,13 +59,19 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html')); // Asegúrate de que la ruta sea correcta
 });
 
-// Start the server
-// server.listen(PORT, () => {
-//   console.log(`Server is running on port ${PORT}`);
-// });
+// Optional: Configure CORS options
+const corsOptions = {
+  origin: "http://localhost:5173", // Replace with your frontend URL
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Allowed HTTP methods
+  credentials: true, // Allow credentials (like cookies)
+};
+
+// Use CORS middleware with options
+app.use(cors(corsOptions));
 
 module.exports = app;
 
+// Start the server
 if (require.main === module) {
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
